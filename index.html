@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+<title>Healing Pod</title>
+
+<style>
+:root{
+  --bg:#020a10;
+  --deep:#031722;
+  --tank:#07364a;
+  --cyan:#83eaff;
+  --cyan2:#bdf7ff;
+  --text:#e9fcff;
+  --muted:#82aeba;
+  --line:rgba(131,234,255,.28);
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:var(--bg);
+  color:var(--text);
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+
+button,
+textarea{
+  font:inherit;
+}
+
+button{
+  color:var(--text);
+}
+
+#app{
+  position:relative;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      #0b3a4e 0%,
+      #041b28 42%,
+      #020a10 100%
+    );
+}
+
+/* =========================
+   AMBIENT BACKGROUND
+========================= */
+
+#fx{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+}
+
+/* =========================
+   PANELS
+========================= */
+
+.panel{
+  position:absolute;
+  inset:0;
+  z-index:2;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+
+  padding:24px;
+}
+
+.hidden{
+  display:none !important;
+}
+
+.card{
+  width:min(520px,94vw);
+
+  padding:24px;
+
+  border:1px solid var(--line);
+  border-radius:24px;
+
+  background:rgba(2,15,23,.82);
+
+  backdrop-filter:blur(16px);
+
+  box-shadow:
+    0 20px 80px rgba(0,0,0,.55),
+    inset 0 0 30px rgba(80,220,255,.025);
+}
+
+.title{
+  margin:0;
+
+  text-align:center;
+
+  font-size:
+    clamp(32px,9vw,58px);
+
+  letter-spacing:.16em;
+}
+
+.subtitle{
+  margin-top:8px;
+
+  text-align:center;
+
+  color:var(--muted);
+
+  font-size:12px;
+
+  letter-spacing:.18em;
+
+  text-transform:uppercase;
+}
+
+.grid{
+  display:grid;
+
+  grid-template-columns:
+    repeat(2,1fr);
+
+  gap:12px;
+
+  margin-top:24px;
+}
+
+.choice,
+.action{
+  border:1px solid var(--line);
+
+  border-radius:16px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10,48,66,.95),
+      rgba(5,28,40,.95)
+    );
+
+  padding:17px 12px;
+
+  cursor:pointer;
+
+  transition:
+    transform .15s,
+    background .15s,
+    border-color .15s;
+}
+
+.choice:hover,
+.action:hover{
+  background:#0b3b50;
+
+  border-color:
+    rgba(131,234,255,.55);
+
+  transform:translateY(-1px);
+}
+
+.choice:active,
+.action:active{
+  transform:scale(.98);
+}
+
+.choice strong{
+  display:block;
+
+  font-size:17px;
+
+  letter-spacing:.05em;
+}
+
+.choice span{
+  display:block;
+
+  margin-top:5px;
+
+  color:var(--muted);
+
+  font-size:12px;
+}
+
+.note{
+  margin-top:18px;
+
+  color:#648996;
+
+  text-align:center;
+
+  font-size:11px;
+
+  line-height:1.5;
+}
+
+/* =========================
+   PROTOCOL SCREEN
+========================= */
+
+#protocolTitle{
+  margin:
+    14px 0 0;
+
+  text-align:center;
+
+  font-size:32px;
+
+  letter-spacing:.14em;
+}
+
+#protocolDescription{
+  margin-top:10px;
+
+  text-align:center;
+
+  color:var(--muted);
+
+  line-height:1.5;
+}
+
+/* =========================
+   POD
+========================= */
+
+#pod{
+  justify-content:flex-start;
+
+  padding-top:
+    max(7vh,40px);
+}
+
+.podReadout{
+  width:min(560px,94vw);
+
+  text-align:center;
+}
+
+.mode{
+  color:var(--cyan);
+
+  font-size:11px;
+
+  letter-spacing:.25em;
+
+  text-transform:uppercase;
+}
+
+#instruction{
+  margin-top:12px;
+
+  font-size:
+    clamp(28px,8vw,50px);
+
+  font-weight:300;
+
+  letter-spacing:.12em;
+}
+
+#detail{
+  color:var(--muted);
+
+  font-size:14px;
+
+  line-height:1.5;
+}
+
+.progressTrack{
+  width:100%;
+
+  height:7px;
+
+  margin:
+    22px 0;
+
+  overflow:hidden;
+
+  border-radius:99px;
+
+  background:#06202c;
+}
+
+#progress{
+  width:0;
+  height:100%;
+
+  border-radius:99px;
+
+  background:var(--cyan);
+
+  box-shadow:
+    0 0 20px var(--cyan);
+
+  transition:width .25s;
+}
+
+/* =========================
+   BREATHING
+========================= */
+
+#breathArea{
+  min-height:150px;
+
+  display:flex;
+
+  flex-direction:column;
+
+  justify-content:center;
+
+  align-items:center;
+}
+
+#breathCircle{
+  width:90px;
+  height:90px;
+
+  border-radius:50%;
+
+  border:1px solid
+    rgba(131,234,255,.55);
+
+  box-shadow:
+    0 0 30px rgba(131,234,255,.15);
+
+  transition:
+    transform 4s ease-in-out;
+}
+
+#breathText{
+  margin-top:16px;
+
+  color:var(--cyan2);
+
+  letter-spacing:.25em;
+
+  font-size:12px;
+}
+
+/* =========================
+   JOURNAL
+========================= */
+
+#journal{
+  width:100%;
+
+  min-height:100px;
+
+  resize:none;
+
+  margin-top:18px;
+
+  padding:14px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius:16px;
+
+  outline:none;
+
+  background:#031823;
+
+  color:var(--text);
+}
+
+#journal::placeholder{
+  color:#527582;
+}
+
+/* =========================
+   ACTIONS
+========================= */
+
+.actions{
+  display:flex;
+
+  justify-content:center;
+
+  gap:10px;
+
+  flex-wrap:wrap;
+
+  margin-top:18px;
+}
+
+/* =========================
+   COMPLETE
+========================= */
+
+.completeTitle{
+  margin:0;
+
+  text-align:center;
+
+  font-size:25px;
+
+  letter-spacing:.12em;
+}
+
+.completeText{
+  margin:
+    18px 0;
+
+  color:var(--muted);
+
+  text-align:center;
+
+  line-height:1.6;
+}
+</style>
+</head>
+
+<body>
+
+<div id="app">
+
+<canvas id="fx"></canvas>
+
+<!-- =========================
+     SCAN
+========================= -->
+
+<section id="home" class="panel">
+
+  <div class="card">
+
+    <h1 class="title">
+      HEALING POD
+    </h1>
+
+    <div class="subtitle">
+      Sensory Recovery Chamber
+    </div>
+
+    <div class="grid">
+
+      <button
+        class="choice"
+        data-target="physical">
+
+        <strong>PHYSICAL</strong>
+
+        <span>
+          Stiffness or physical fatigue
+        </span>
+
+      </button>
+
+      <button
+        class="choice"
+        data-target="mental">
+
+        <strong>MENTAL</strong>
+
+        <span>
+          Mental load or rumination
+        </span>
+
+      </button>
+
+      <button
+        class="choice"
+        data-target="focus">
+
+        <strong>FOCUS</strong>
+
+        <span>
+          Overstimulation
+        </span>
+
+      </button>
+
+      <button
+        class="choice"
+        data-target="sleep">
+
+        <strong>SLEEP</strong>
+
+        <span>
+          Wind-down or rest
+        </span>
+
+      </button>
+
+    </div>
+
+    <div class="note">
+      The chamber visualizes completion of a recovery
+      session. It does not measure biological healing.
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================
+     PROTOCOL
+========================= -->
+
+<section
+  id="protocol"
+  class="panel hidden">
+
+  <div class="card">
+
+    <div class="subtitle">
+      Repair Protocol
+    </div>
+
+    <h2 id="protocolTitle">
+      SELECT
+    </h2>
+
+    <div id="protocolDescription"></div>
+
+    <div
+      id="protocolChoices"
+      class="grid">
+    </div>
+
+    <button
+      id="protocolBack"
+      class="action"
+      style="width:100%;margin-top:12px">
+
+      BACK
+
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- =========================
+     POD
+========================= -->
+
+<section
+  id="pod"
+  class="panel hidden">
+
+  <div class="podReadout">
+
+    <div
+      id="mode"
+      class="mode">
+      SENSORY FLOAT
+    </div>
+
+    <div id="instruction">
+      FLOAT
+    </div>
+
+    <div id="detail">
+      Reduce input. Nothing else is required.
+    </div>
+
+    <div class="progressTrack">
+
+      <div id="progress"></div>
+
+    </div>
+
+
+    <div id="breathArea">
+
+      <div id="breathCircle"></div>
+
+      <div id="breathText"></div>
+
+    </div>
+
+
+    <textarea
+      id="journal"
+      class="hidden"
+      placeholder="What can wait outside the pod?"></textarea>
+
+
+    <div class="actions">
+
+      <button
+        id="pause"
+        class="action">
+
+        PAUSE
+
+      </button>
+
+      <button
+        id="exit"
+        class="action">
+
+        EXIT POD
+
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================
+     COMPLETE
+========================= -->
+
+<section
+  id="complete"
+  class="panel hidden">
+
+  <div class="card">
+
+    <div class="subtitle">
+      Chamber Cycle Complete
+    </div>
+
+    <h2 class="completeTitle">
+      RECOVERY COMPLETE
+    </h2>
+
+    <p
+      id="completeText"
+      class="completeText">
+    </p>
+
+    <button
+      id="returnHome"
+      class="action"
+      style="width:100%">
+
+      RETURN TO POD
+
+    </button>
+
+  </div>
+
+</section>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   HEALING POD CORE
+===================================================== */
+
+const PROTOCOLS = {
+
+  physical:{
+
+    title:"PHYSICAL",
+
+    description:
+      "Choose a gentle body-recovery protocol.",
+
+    options:[
+
+      {
+        label:"MOVE",
+        description:"Gentle mobility sequence",
+        type:"mobility"
+      },
+
+      {
+        label:"WALK",
+        description:"Easy active recovery",
+        type:"walk"
+      },
+
+      {
+        label:"FLOAT",
+        description:"Quiet rest",
+        type:"float"
+      }
+
+    ]
+
+  },
+
+
+  mental:{
+
+    title:"MENTAL",
+
+    description:
+      "Unload one thing without having to solve everything.",
+
+    options:[
+
+      {
+        label:"JOURNAL",
+        description:"Put one thought outside the pod",
+        type:"journal"
+      },
+
+      {
+        label:"BREATHE",
+        description:"Slow breathing",
+        type:"breathe"
+      },
+
+      {
+        label:"FLOAT",
+        description:"Sensory recovery",
+        type:"float"
+      }
+
+    ]
+
+  },
+
+
+  focus:{
+
+    title:"FOCUS",
+
+    description:
+      "Reduce competing sensory input.",
+
+    options:[
+
+      {
+        label:"BREATHE",
+        description:"4-second inhale / 6-second exhale",
+        type:"breathe"
+      },
+
+      {
+        label:"FLOAT",
+        description:"Minimal stimulation",
+        type:"float"
+      },
+
+      {
+        label:"WALK",
+        description:"Step away from the screen",
+        type:"walk"
+      }
+
+    ]
+
+  },
+
+
+  sleep:{
+
+    title:"SLEEP",
+
+    description:
+      "Prepare the system for rest.",
+
+    options:[
+
+      {
+        label:"WIND DOWN",
+        description:"Slow breathing",
+        type:"breathe"
+      },
+
+      {
+        label:"NAP",
+        description:"Quiet rest",
+        type:"nap"
+      },
+
+      {
+        label:"FLOAT",
+        description:"Low stimulation",
+        type:"float"
+      }
+
+    ]
+
+  }
+
+};
+
+
+/* =====================================================
+   STATE
+===================================================== */
+
+const state={
+
+  target:null,
+
+  protocol:null,
+
+  elapsed:0,
+
+  duration:30000,
+
+  paused:false,
+
+  animation:null,
+
+  lastTime:0
+
+};
+
+
+/* =====================================================
+   DOM
+===================================================== */
+
+const $ = selector =>
+  document.querySelector(selector);
+
+
+function show(id){
+
+  document
+    .querySelectorAll(".panel")
+    .forEach(panel =>
+      panel.classList.add("hidden")
+    );
+
+  $(id).classList.remove("hidden");
+}
+
+
+/* =====================================================
+   SCAN
+===================================================== */
+
+document
+  .querySelectorAll("[data-target]")
+  .forEach(button=>{
+
+    button.onclick=()=>{
+
+      state.target =
+        button.dataset.target;
+
+      openProtocol(
+        state.target
+      );
+
+    };
+
+  });
+
+
+function openProtocol(target){
+
+  const data =
+    PROTOCOLS[target];
+
+  $("#protocolTitle")
+    .textContent =
+    data.title;
+
+  $("#protocolDescription")
+    .textContent =
+    data.description;
+
+  $("#protocolChoices")
+    .innerHTML="";
+
+  data.options.forEach(option=>{
+
+    const button =
+      document.createElement("button");
+
+    button.className="choice";
+
+    button.innerHTML=`
+      <strong>${option.label}</strong>
+      <span>${option.description}</span>
+    `;
+
+    button.onclick=()=>{
+
+      startProtocol(
+        option.type
+      );
+
+    };
+
+    $("#protocolChoices")
+      .appendChild(button);
+
+  });
+
+  show("#protocol");
+}
+
+
+$("#protocolBack").onclick=()=>{
+  show("#home");
+};
+
+
+/* =====================================================
+   START PROTOCOL
+===================================================== */
+
+function startProtocol(type){
+
+  cancelAnimationFrame(
+    state.animation
+  );
+
+  state.protocol=type;
+
+  state.elapsed=0;
+
+  state.paused=false;
+
+  $("#pause")
+    .textContent="PAUSE";
+
+  $("#journal")
+    .classList.add("hidden");
+
+  $("#breathArea")
+    .classList.remove("hidden");
+
+  const settings={
+
+    mobility:{
+      name:"MOBILITY REPAIR",
+      instruction:"NECK",
+      detail:
+        "Move gently. Never force range.",
+      duration:45000
+    },
+
+    walk:{
+      name:"ACTIVE RECOVERY",
+      instruction:"STEP AWAY",
+      detail:
+        "Take an easy walk away from the screen.",
+      duration:60000
+    },
+
+    breathe:{
+      name:"BREATHING RECOVERY",
+      instruction:"BREATHE",
+      detail:
+        "4-second inhale / 6-second exhale.",
+      duration:60000
+    },
+
+    journal:{
+      name:"MENTAL REPAIR",
+      instruction:"UNLOAD",
+      detail:
+        "Write one thing that can wait.",
+      duration:60000
+    },
+
+    nap:{
+      name:"REST CYCLE",
+      instruction:"REST",
+      detail:
+        "Put the device down and rest.",
+      duration:30000
+    },
+
+    float:{
+      name:"SENSORY FLOAT",
+      instruction:"FLOAT",
+      detail:
+        "Reduce stimulation. Nothing else is required.",
+      duration:30000
+    }
+
+  }[type];
+
+
+  state.duration =
+    settings.duration;
+
+  $("#mode")
+    .textContent =
+    settings.name;
+
+  $("#instruction")
+    .textContent =
+    settings.instruction;
+
+  $("#detail")
+    .textContent =
+    settings.detail;
+
+  $("#progress")
+    .style.width="0%";
+
+  $("#breathText")
+    .textContent="";
+
+  $("#breathCircle")
+    .style.transform="scale(1)";
+
+  if(type==="journal"){
+
+    $("#journal")
+      .classList.remove("hidden");
+
+    $("#journal")
+      .value="";
+
+  }
+
+  show("#pod");
+
+  state.lastTime=
+    performance.now();
+
+  state.animation =
+    requestAnimationFrame(
+      tick
+    );
+
+}
+
+
+/* =====================================================
+   MAIN LOOP
+===================================================== */
+
+function tick(now){
+
+  if(!state.paused){
+
+    const delta =
+      now-state.lastTime;
+
+    state.elapsed += delta;
+
+  }
+
+  state.lastTime=now;
+
+  const progress =
+    Math.min(
+      1,
+      state.elapsed/state.duration
+    );
+
+
+  $("#progress")
+    .style.width =
+    `${progress*100}%`;
+
+
+  updateProtocol(
+    state.protocol,
+    state.elapsed,
+    progress
+  );
+
+
+  if(progress>=1){
+
+    complete();
+
+    return;
+
+  }
+
+
+  state.animation =
+    requestAnimationFrame(
+      tick
+    );
+
+}
+
+
+/* =====================================================
+   PROTOCOL BEHAVIOR
+===================================================== */
+
+function updateProtocol(
+  type,
+  elapsed,
+  progress
+){
+
+  if(type==="breathe"){
+
+    const cycle =
+      elapsed%10000;
+
+    if(cycle<4000){
+
+      const amount =
+        cycle/4000;
+
+      $("#breathText")
+        .textContent="INHALE";
+
+      $("#breathCircle")
+        .style.transform=
+        `scale(${1+amount*.45})`;
+
+    }else{
+
+      const amount =
+        (cycle-4000)/6000;
+
+      $("#breathText")
+        .textContent="EXHALE";
+
+      $("#breathCircle")
+        .style.transform=
+        `scale(${1.45-amount*.45})`;
+
+    }
+
+  }
+
+
+  if(type==="mobility"){
+
+    const steps=[
+      "NECK",
+      "HIPS",
+      "ANKLES",
+      "SPINE"
+    ];
+
+    const index =
+      Math.min(
+        3,
+        Math.floor(
+          progress*4
+        )
+      );
+
+    $("#instruction")
+      .textContent =
+      steps[index];
+
+  }
+
+
+  if(type==="walk"){
+
+    $("#instruction")
+      .textContent =
+      progress<.5
+      ? "STEP AWAY"
+      : "EASY WALK";
+
+  }
+
+
+  if(type==="journal"){
+
+    $("#instruction")
+      .textContent =
+      progress<.25
+      ? "WRITE"
+      : "SEAL";
+
+  }
+
+
+  if(type==="nap"){
+
+    $("#instruction")
+      .textContent="REST";
+
+  }
+
+
+  if(type==="float"){
+
+    $("#instruction")
+      .textContent="FLOAT";
+
+  }
+
+}
+
+
+/* =====================================================
+   PAUSE / EXIT
+===================================================== */
+
+$("#pause").onclick=()=>{
+
+  state.paused =
+    !state.paused;
+
+  $("#pause")
+    .textContent =
+    state.paused
+    ? "RESUME"
+    : "PAUSE";
+
+};
+
+
+$("#exit").onclick=()=>{
+
+  cancelAnimationFrame(
+    state.animation
+  );
+
+  $("#journal")
+    .classList.add("hidden");
+
+  show("#home");
+
+};
+
+
+/* =====================================================
+   COMPLETE
+===================================================== */
+
+function complete(){
+
+  cancelAnimationFrame(
+    state.animation
+  );
+
+  const descriptions={
+
+    mobility:
+      "Mobility sequence completed.",
+
+    walk:
+      "Active-recovery session completed.",
+
+    breathe:
+      "Breathing session completed.",
+
+    journal:
+      "Mental-unload session completed.",
+
+    nap:
+      "Rest cycle completed.",
+
+    float:
+      "Sensory-float session completed."
+
+  };
+
+  $("#completeText")
+    .textContent =
+    descriptions[state.protocol]+
+    " The chamber visual represents completion of the session; it is not a measurement of biological healing.";
+
+  $("#journal")
+    .classList.add("hidden");
+
+  show("#complete");
+
+}
+
+
+$("#returnHome").onclick=()=>{
+  show("#home");
+};
+
+
+/* =====================================================
+   AMBIENT GOO / BUBBLES
+===================================================== */
+
+const canvas =
+  $("#fx");
+
+const ctx =
+  canvas.getContext("2d");
+
+let particles=[];
+
+
+function resize(){
+
+  canvas.width =
+    innerWidth*
+    devicePixelRatio;
+
+  canvas.height =
+    innerHeight*
+    devicePixelRatio;
+
+  ctx.setTransform(
+    devicePixelRatio,
+    0,
+    0,
+    devicePixelRatio,
+    0,
+    0
+  );
+
+}
+
+
+function seedParticles(){
+
+  particles=[];
+
+  for(let i=0;i<75;i++){
+
+    particles.push({
+
+      x:
+        Math.random()*
+        innerWidth,
+
+      y:
+        Math.random()*
+        innerHeight,
+
+      r:
+        1+
+        Math.random()*3,
+
+      speed:
+        .1+
+        Math.random()*.5,
+
+      alpha:
+        .12+
+        Math.random()*.35
+
+    });
+
+  }
+
+}
+
+
+function draw(){
+
+  ctx.clearRect(
+    0,
+    0,
+    innerWidth,
+    innerHeight
+  );
+
+
+  const time =
+    performance.now()/1000;
+
+
+  particles.forEach(p=>{
+
+    p.y-=p.speed;
+
+    p.x+=
+      Math.sin(
+        time*.4+
+        p.y*.01
+      )*.08;
+
+
+    if(p.y<-10){
+
+      p.y=
+        innerHeight+10;
+
+      p.x=
+        Math.random()*
+        innerWidth;
+
+    }
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+      p.x,
+      p.y,
+      p.r,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fillStyle=
+      `rgba(150,235,255,${p.alpha})`;
+
+    ctx.fill();
+
+  });
+
+
+  requestAnimationFrame(
+    draw
+  );
+
+}
+
+
+resize();
+
+seedParticles();
+
+addEventListener(
+  "resize",
+  resize
+);
+
+draw();
+
+</script>
+
+</body>
+</html>
